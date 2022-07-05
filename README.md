@@ -6,8 +6,6 @@ For now only provide a class to operate with a mongo database.
 # Dependencies
 - **Pymongo** --> pip install pymongo==4.0.1
 
-# Changes from pymongo V3 version
-
 ## Use of SELECT
 
 Now if you want to use select operation, you should close the cursor given from the function, so, in order to implement these new feature on
