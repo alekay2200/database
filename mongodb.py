@@ -34,14 +34,14 @@ class MyCursor:
 
 class MongoDB(Abstract_Database):
 
-    def __init__(self, db_name: str, config_file: str):
-        Abstract_Database.__init__(self, db_name, config_file)
+    def __init__(self, config_file: str):
+        Abstract_Database.__init__(self, config_file)
 
     def _connect(self) -> MongoClient:
         """ 
         Return a database client -> MongoClient
         """
-        client = MongoClient("mongodb://{}:{}@{}:{}".format(self._username, self._password, self._ip, self._port))
+        client = MongoClient(f"mongodb://{self._username}:{self._password}@{self._ip}:{self._port}")
         return client
 
     def _close_connection(self, client):
@@ -56,6 +56,7 @@ class MongoDB(Abstract_Database):
         """
         Return document in dict format if exists, else return None
         """
+        success = True
         try:
             #Connect to database
             client = self._connect()
@@ -64,11 +65,12 @@ class MongoDB(Abstract_Database):
             #Get data from database
             collection: Collection = db[collection]
             doc = collection.find_one(query, fields)
+        except:
+            success = False
         finally:
             #Close connection
             self._close_connection(client)
-
-        return doc
+            return doc, success
 
     def select(self, query: Dict, collection: str, fields: Set[str] = None, sort_fields: List[Tuple[str, int]] = [], limit: int = 0) -> MyCursor:
         """ 
@@ -100,12 +102,12 @@ class MongoDB(Abstract_Database):
             cursor = collection.find(query, fields).sort(sort_fields).limit(limit)
         else:
             cursor = collection.find(query, fields).limit(limit)
-        documents = MyCursor(client, cursor)
+        myCursor = MyCursor(client, cursor)
 
-        return documents
+        return myCursor
 
 
-    def insert_one(self, data: Dict[str, Any], collection: str):
+    def insert_one(self, data: Dict[str, Any], collection: str) -> bool:
         """
         Insert new document into database
 
@@ -116,16 +118,20 @@ class MongoDB(Abstract_Database):
         - collection (str): collection where insert data 
         """
         # Connect to database
+        success = True
         try:
             client = self._connect()
             db = client[self.get_db_name()]
 
             collection: Collection = db[collection]
             collection.insert_one(data)
+        except:
+            success = False
             
         finally:
             #Close connection
             self._close_connection(client)
+            return success
 
     def insert_many(self, datas: List[Dict[str, Any]], collection: str):
         """
@@ -148,9 +154,9 @@ class MongoDB(Abstract_Database):
             #Close connection
             self._close_connection(client)
 
-    def count(self, query: Dict, collection: str, fields: Set[str] = None) -> int:
+    def count(self, query: Dict, collection: str) -> int:
         """ 
-        Get number of documents which exists from given query
+        Get number of documents which exists from given query, if was an error with the query return -1
 
         Parameters:
         -----------
@@ -164,6 +170,7 @@ class MongoDB(Abstract_Database):
 
         Number of documents from given query
         """
+        count = -1
         try:
             #Connect to database
             client = self._connect()
@@ -171,12 +178,11 @@ class MongoDB(Abstract_Database):
 
             #Get data from database
             collection: Collection = db[collection]
-            count = collection.count_documents(query, fields)
+            count = collection.count_documents(query)
         finally:
             #Close connection
             self._close_connection(client)
-
-        return count
+            return count
 
     def count_all(self, collection: str) -> int:
         """ 
@@ -187,6 +193,7 @@ class MongoDB(Abstract_Database):
 
         Number of documents from given collection
         """
+        count = -1
         try:
             #Connect to database
             client = self._connect()
@@ -198,8 +205,7 @@ class MongoDB(Abstract_Database):
         finally:
             #Close connection
             self._close_connection(client)
-
-        return count
+            return count
 
     def update_one(self, query: Dict, new_values: Dict[str, Any], collection: str) -> bool:
         """

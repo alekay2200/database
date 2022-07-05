@@ -1,17 +1,7 @@
 {
-<<<<<<< HEAD
-	"DatabaseCredentials" :{
-		"username" : "cetaqua",
-		"password":"Cetaqua1!",
-		"ip": "cetand.sytes.net",
-		"port":"3306"
-	}
-}
-=======
 	"db_name": "",
 	"username" : "",
 	"password":"",
 	"ip": "",
 	"port": -1
 }
->>>>>>> 68fa3c22524f0eb0b4dcbfdcc653bc0ea044e293

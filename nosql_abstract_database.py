@@ -17,19 +17,17 @@ class Abstract_Database(ABC, Generic[T]):
     _password: str
     _db_name: str
 
-    def __init__(self, db_name: str, config_file: str):
+    def __init__(self, config_file: str):
         """
-        - db_name (str): Name of the database to connect
         - config_file (str): Path to the configuration file necessary to connect to the database server
         """
-        self._db_name = db_name
         with open(config_file) as f:
             json_file = load(f)
             self._ip = json_file["ip"]
             self._port = json_file["port"]
             self._username = json_file["username"]
             self._password = json_file["password"]
-            self._db_name = db_name
+            self._db_name = json_file["db_name"]
 
     def get_db_name(self) -> str:
         return self._db_name
