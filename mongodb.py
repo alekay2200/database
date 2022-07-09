@@ -34,7 +34,7 @@ class MyCursor:
 
 class MongoDB(Abstract_Database):
 
-    def __init__(self, config_file: str):
+    def __init__(self, config_file: Union[str, None] = None):
         Abstract_Database.__init__(self, config_file)
 
     def _connect(self) -> MongoClient:
